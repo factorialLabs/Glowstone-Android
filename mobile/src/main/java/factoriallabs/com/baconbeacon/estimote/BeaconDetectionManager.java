@@ -20,15 +20,15 @@ public class BeaconDetectionManager {
     //public double min = 0;
 
     private BeaconManager beaconManager;
-    private OnTableDetectListener callback;
+    private OnBeaconDetectListener callback;
 
-    public interface OnTableDetectListener{
+    public interface OnBeaconDetectListener {
         void onBeaconFind(Region region, List<Beacon> beacons);
         void onClosestBeaconFind(Beacon beacon);
         //void onConditionBeaconFind(List<Beacon> beacons);
     }
 
-    BeaconDetectionManager(Context c, OnTableDetectListener l){
+    public BeaconDetectionManager(Context c, OnBeaconDetectListener l){
         beaconManager = new BeaconManager(c);
         //min = minimum_signal;
         callback = l;

@@ -24,7 +24,7 @@ import factoriallabs.com.baconbeacon.R;
 
 /**
  * Created by YuChen on 2015-03-12.
- */
+
 public class MenuDataSetAdapter extends RecyclerView.Adapter<MenuDataSetAdapter.ViewHolder> implements Filterable{
     private final Context context;
     private ArrayList<Menu> mMenuDataset;
@@ -128,16 +128,6 @@ public class MenuDataSetAdapter extends RecyclerView.Adapter<MenuDataSetAdapter.
             else
         holder.mImageView.setImageBitmap(u.cached_picture); //reuse cached picture
 
-        /*create the intent to launch the new activity
-        final Intent intent = new Intent(context, MenuDetailActivity.class);
-        intent.putExtra("Menu", u);
-        //OnClick intent
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    context.startActivity(intent);
-                }
-            }); */
         }
     }
 
@@ -149,4 +139,4 @@ public class MenuDataSetAdapter extends RecyclerView.Adapter<MenuDataSetAdapter.
             return mMenuDatasetFiltered.size();
         else return 0;
     }
-}
+} */
