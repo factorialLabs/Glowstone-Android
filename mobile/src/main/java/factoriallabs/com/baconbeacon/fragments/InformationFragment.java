@@ -1,11 +1,20 @@
 package factoriallabs.com.baconbeacon.fragments;
 
+import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
+
+import java.util.Locale;
 
 import factoriallabs.com.baconbeacon.R;
 
@@ -17,17 +26,20 @@ import factoriallabs.com.baconbeacon.R;
  * Use the {@link InformationFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class InformationFragment extends Fragment {
+public class InformationFragment extends Fragment implements TextToSpeech.OnInitListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private FadingActionBarHelper mFadingHelper;
+    private Bundle mArguments;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private TextToSpeech tts;
+    private String mDescription;
 
     /**
      * Use this factory method to create a new instance of
@@ -58,13 +70,39 @@ public class InformationFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        mDescription = getActivity().getResources().getString(R.string.loren_ipsum);
+        tts = new TextToSpeech(getActivity(), this);
+    }
+
+    public void setText(String text){
+        mDescription = text;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_information, container, false);
+        View v = mFadingHelper.createView(inflater);
+        ImageView img = (ImageView) v.findViewById(R.id.image_header);
+        img.setImageResource(R.drawable.mc);
+
+        ImageButton btn = (ImageButton) v.findViewById(R.id.imageButton);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //read aloud
+                if (tts!=null) {
+                    if (mDescription!=null) {
+                        if (!tts.isSpeaking()) {
+                            tts.speak(mDescription, TextToSpeech.QUEUE_FLUSH, null);
+                        }else{
+                            tts.stop();
+                        }
+                    }
+                }
+            }
+        });
+        return v;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -77,6 +115,30 @@ public class InformationFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+
+    @Override
+    public void onDestroy() {
+        if (tts!=null) {
+            tts.stop();
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onInit(int code) {
+        if (code==TextToSpeech.SUCCESS) {
+            tts.setLanguage(Locale.getDefault());
+            tts.setSpeechRate(0.75f);
+
+
+        } else {
+            tts = null;
+            Toast.makeText(getActivity(), "Failed to initialize TTS engine.",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -93,5 +155,18 @@ public class InformationFragment extends Fragment {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
+        mArguments = getArguments();
+        int actionBarBg = R.color.primary_material_dark;
+
+        mFadingHelper = new FadingActionBarHelper()
+                .actionBarBackground(actionBarBg)
+                .headerLayout(R.layout.header)
+                .contentLayout(R.layout.fragment_information)
+                .lightActionBar(true);
+        mFadingHelper.initActionBar(activity);
+    }
 }

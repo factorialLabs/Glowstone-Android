@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.Region;
+import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import java.util.List;
 
@@ -23,6 +24,8 @@ import factoriallabs.com.baconbeacon.fragments.SearchingFragment;
 public class SearchingActivity extends AppCompatActivity implements BeaconDetectionManager.OnBeaconDetectListener{
 
     private BeaconDetectionManager mBeaconDetectionManager;
+
+    boolean mShowBeaconInfo = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +99,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
-        if(beacon != null && beacon.getRssi() > -70){
+        if(beacon != null && !mShowBeaconInfo && beacon.getRssi() > -70){
             //good enough signal
             //go back to searching screen
             Fragment infofrag = manager.findFragmentByTag("InformationFragment");
@@ -107,15 +110,21 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
             transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
             transaction.commit();
 
-        }else{
-            //go back to searching screen
-            Fragment frag = manager.findFragmentByTag("searchfragment");
-            if(frag == null){
-                frag = SearchingFragment.newInstance(null, null);
-            }
+            mShowBeaconInfo = true;
 
-            transaction.replace(R.id.container, frag, "searchfragment"); // newInstance() is a static factory method.
-            transaction.commit();
+        }else{
+            if(beacon != null && mShowBeaconInfo && beacon.getRssi() < -70){
+                //go back to searching screen
+                Fragment frag = manager.findFragmentByTag("searchfragment");
+                if(frag == null){
+                    frag = SearchingFragment.newInstance(null, null);
+                }
+
+                transaction.replace(R.id.container, frag, "searchfragment"); // newInstance() is a static factory method.
+                transaction.commit();
+
+                mShowBeaconInfo = false;
+            }
         }
 
     }

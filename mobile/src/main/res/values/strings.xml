@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Proxima</string>
+    <string name="app_name">Glowstone</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
@@ -7,4 +7,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="searching">Searching</string>
+    <string name="loren_ipsum">Lorizzle ipsizzle dolor sit amizzle, shizzlin dizzle adipiscing that\'s the shizzle. Nullam mah nizzle velizzle, its fo rizzle volutpizzle, suscipizzle quizzle, fo vizzle, pizzle. Sizzle we gonna chung fo shizzle my nizzle. Pizzle eros. izzle dolizzle dapibus turpis tempizzle tempor. Mauris cool nibh et turpis. Izzle izzle tortizzle. Pellentesque we gonna chung rhoncus mah nizzle. In i\'m in the shizzle habitasse dope dictumst. Fizzle dapibizzle. Curabitizzle tellus for sure, pretium eu, mattizzle ac, break it down ghetto, nunc. Shiz own yo\'. Bling bling semper velit bizzle fo shizzle.</string>
 </resources>
