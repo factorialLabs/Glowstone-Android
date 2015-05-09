@@ -12,13 +12,14 @@ import android.widget.Toast;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.Region;
-import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import java.util.List;
 
 import factoriallabs.com.baconbeacon.estimote.BeaconDetectionManager;
 import factoriallabs.com.baconbeacon.fragments.InformationFragment;
 import factoriallabs.com.baconbeacon.fragments.SearchingFragment;
+import android.widget.TextView;
+
 
 
 public class SearchingActivity extends AppCompatActivity implements BeaconDetectionManager.OnBeaconDetectListener{
@@ -35,12 +36,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         //FrameLayout frame = (FrameLayout) findViewById(R.id.container);
 
         if (savedInstanceState == null) {
-            /* During initial setup, plug in the details fragment.
-            TableFragment table = new TableFragment();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(CONTENT_VIEW_ID, table).commit();
-            table.setArguments(getIntent().getExtras());
-            getFragmentManager().beginTransaction().add(android.R.id.content, details).commit(); */
+
         }
 
         FragmentManager manager = getSupportFragmentManager();
@@ -89,31 +85,33 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
     }
 
     @Override
-    public void onBeaconFind(Region region, List<Beacon> beacons) {
-
-    }
-
-    @Override
-    public void onClosestBeaconFind(Beacon beacon) {
-        //show info fragment if it is not already open
+    public void onBeaconFind(Region region, List<Beacon> beacons, Beacon closestBeacon) {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
-        if(beacon != null && !mShowBeaconInfo && beacon.getRssi() > -70){
+        if(closestBeacon != null){
             //good enough signal
             //go back to searching screen
-            Fragment infofrag = manager.findFragmentByTag("InformationFragment");
-            if(infofrag == null){
-                infofrag = InformationFragment.newInstance(null, null);
+
+            //TODO: Fix case when closest beacon changes
+
+            InformationFragment infofrag = (InformationFragment) manager.findFragmentByTag("InformationFragment");
+            StringBuffer beaconStatus = new StringBuffer();
+            for (Beacon b : beacons) {
+                beaconStatus.append("Beacon name: " + b.toString() + "\nBeacon signal strength: " + b.getRssi() + "\n\n");
             }
-            Toast.makeText(this,"Signal: " + beacon.getRssi(),Toast.LENGTH_LONG).show();
-            transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
-            transaction.commit();
-
+            if (!mShowBeaconInfo) {
+                if (infofrag == null) {
+                    infofrag = InformationFragment.newInstance(null, null);
+                }
+                Toast.makeText(this, "Signal: " + closestBeacon.getRssi(), Toast.LENGTH_LONG).show();
+                transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
+                transaction.commit();
+            }
+            infofrag.setText(beaconStatus.toString());
             mShowBeaconInfo = true;
-
         }else{
-            if(beacon != null && mShowBeaconInfo && beacon.getRssi() < -70){
+            if(mShowBeaconInfo){
                 //go back to searching screen
                 Fragment frag = manager.findFragmentByTag("searchfragment");
                 if(frag == null){
@@ -126,6 +124,10 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
                 mShowBeaconInfo = false;
             }
         }
+    }
+
+    @Override
+    public void onClosestBeaconFind(Beacon beacon) {
 
     }
 }

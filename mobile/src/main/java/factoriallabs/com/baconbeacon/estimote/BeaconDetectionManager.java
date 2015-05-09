@@ -2,13 +2,18 @@ package factoriallabs.com.baconbeacon.estimote;
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by yuchen.hou on 15-05-09.
@@ -23,7 +28,7 @@ public class BeaconDetectionManager {
     private OnBeaconDetectListener callback;
 
     public interface OnBeaconDetectListener {
-        void onBeaconFind(Region region, List<Beacon> beacons);
+        void onBeaconFind(Region region, List<Beacon> beacons, Beacon min);
         void onClosestBeaconFind(Beacon beacon);
         //void onConditionBeaconFind(List<Beacon> beacons);
     }
@@ -43,19 +48,21 @@ public class BeaconDetectionManager {
         beaconManager.setRangingListener(new BeaconManager.RangingListener() {
             @Override
             public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
-                callback.onBeaconFind(region, beacons);
-
                 double min_rssi = -1000;
                 Beacon min = null;
+                List<Beacon> nearBeacons = new ArrayList<Beacon>();
 
                 for(Beacon b : beacons){
-                    if(b.getRssi() > min_rssi){
-                        min = b;
-                        min_rssi = b.getRssi();
+                    if(b.getRssi() > -70) {
+                        nearBeacons.add(b);
+                        if (b.getRssi() > min_rssi) {
+                            min = b;
+                            min_rssi = b.getRssi();
+                        }
                     }
                 }
-                callback.onClosestBeaconFind(min);
 
+                callback.onBeaconFind(region, nearBeacons, min);
             }
         });
     }

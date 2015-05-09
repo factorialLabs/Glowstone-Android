@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
@@ -40,6 +41,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     private OnFragmentInteractionListener mListener;
     private TextToSpeech tts;
     private String mDescription;
+    private TextView textView;
 
     /**
      * Use this factory method to create a new instance of
@@ -75,7 +77,11 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     }
 
     public void setText(String text){
-        mDescription = text;
+        if (text != null) {
+            mDescription = text;
+            if(textView != null)
+                textView.setText(mDescription);
+        }
     }
 
     @Override
@@ -85,6 +91,10 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         View v = mFadingHelper.createView(inflater);
         ImageView img = (ImageView) v.findViewById(R.id.image_header);
         img.setImageResource(R.drawable.mc);
+
+        textView = (TextView) v.findViewById(R.id.description);
+        if(mDescription != null)
+            textView.setText(mDescription);
 
         ImageButton btn = (ImageButton) v.findViewById(R.id.imageButton);
         btn.setOnClickListener(new View.OnClickListener() {
