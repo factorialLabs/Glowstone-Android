@@ -28,8 +28,8 @@ public class BeaconDetectionManager {
     private OnBeaconDetectListener callback;
 
     public interface OnBeaconDetectListener {
-        void onBeaconFind(Region region, List<Beacon> beacons, Beacon min);
-        void onClosestBeaconFind(Beacon beacon);
+        void onBeaconFind(Region region, List<Beacon> beacons);
+        //void onClosestBeaconFind(Beacon beacon);
         //void onConditionBeaconFind(List<Beacon> beacons);
     }
 
@@ -62,7 +62,7 @@ public class BeaconDetectionManager {
                     }
                 }
 
-                callback.onBeaconFind(region, nearBeacons, min);
+                callback.onBeaconFind(region, nearBeacons);
             }
         });
     }

@@ -1,9 +1,12 @@
 package factoriallabs.com.baconbeacon.tasks;
 
+import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+
+import java.util.List;
 
 /**
  * Created by yuchen.hou on 15-05-09.
@@ -11,28 +14,30 @@ import com.parse.ParseQuery;
 public class Task {
 
     public interface OnResultListener{
-        void onDone(ParseObject object);
+        void onDone(List<ParseObject> object);
     }
 
     private OnResultListener callback;
     ParseQuery<ParseObject> query;
 
-    Task(String endpoint, OnResultListener l){
+    public Task(String endpoint, OnResultListener l){
         query = ParseQuery.getQuery(endpoint);
         callback = l;
     }
 
     public void run(){
-        query.getInBackground("", new GetCallback<ParseObject>() {
-            public void done(ParseObject object, ParseException e) {
+        query.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> list, ParseException e) {
                 if (e == null) {
                     //call back
-                    callback.onDone(object);
+                    callback.onDone(list);
                 } else {
                     // something went wrong
                     callback.onDone(null);
                 }
             }
+
         });
     }
 }

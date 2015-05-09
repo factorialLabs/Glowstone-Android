@@ -52,10 +52,10 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
      * @return A new instance of fragment InformationFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static InformationFragment newInstance(String param1, String param2) {
+    public static InformationFragment newInstance(String description, String param2) {
         InformationFragment fragment = new InformationFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putString(ARG_PARAM1, description);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -69,10 +69,10 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            mDescription = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        mDescription = getActivity().getResources().getString(R.string.loren_ipsum);
+        //mDescription = getActivity().getResources().getString(R.string.loren_ipsum);
         tts = new TextToSpeech(getActivity(), this);
     }
 
@@ -170,7 +170,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         super.onAttach(activity);
 
         mArguments = getArguments();
-        int actionBarBg = R.color.primary_material_dark;
+        int actionBarBg = R.color.primary;
 
         mFadingHelper = new FadingActionBarHelper()
                 .actionBarBackground(actionBarBg)

@@ -1,10 +1,12 @@
 package factoriallabs.com.baconbeacon;
 
+import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -13,14 +15,24 @@ import android.widget.Toast;
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.Region;
 import com.parse.Parse;
+import com.parse.ParseObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import factoriallabs.com.baconbeacon.estimote.BeaconDetectionManager;
 import factoriallabs.com.baconbeacon.fragments.InformationFragment;
 import factoriallabs.com.baconbeacon.fragments.SearchingFragment;
+import factoriallabs.com.baconbeacon.tasks.BeaconInfo;
+import factoriallabs.com.baconbeacon.tasks.Task;
+
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class SearchingActivity extends AppCompatActivity implements BeaconDetectionManager.OnBeaconDetectListener{
@@ -28,6 +40,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
     private BeaconDetectionManager mBeaconDetectionManager;
 
     boolean mShowBeaconInfo = false;
+    private HashMap<String, BeaconInfo> mBeaconList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,32 +53,46 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
 
         }
 
-        // Enable Local Datastore.
-        Parse.enableLocalDatastore(this);
-
-        Parse.initialize(this, "aMCN1DWIofhjx7Q2S4ezuOljE3A5FyJtRgAZm0sC", "7mAMLVFDkqHlkjmDM82M7bJFcg3l120eyQXLmYnp");
-
-
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
         transaction.replace(R.id.container, SearchingFragment.newInstance(null, null), "searchfragment"); // newInstance() is a static factory method.
         transaction.commit();
 
-        mBeaconDetectionManager = new BeaconDetectionManager(this, this);
-        mBeaconDetectionManager.init();
-        mBeaconDetectionManager.startListening();
+        mBeaconList = new HashMap<>();
+
+        new Task("Beacon", new Task.OnResultListener(){
+
+            @Override
+            public void onDone(List<ParseObject> object) {
+                for(ParseObject obj : object){
+                    JSONObject jobj = obj.getJSONObject("beacon");
+                    try {
+                        mBeaconList.put(jobj.getString("id"),new BeaconInfo(jobj.getString("description"),jobj.getString("name"), jobj.getString("image"),jobj.getString("id")));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                mBeaconDetectionManager = new BeaconDetectionManager(SearchingActivity.this, SearchingActivity.this);
+                mBeaconDetectionManager.init();
+                mBeaconDetectionManager.startListening();
+
+            }
+        }).run();
     }
     @Override
     public void onStop(){
         super.onStop();
-        mBeaconDetectionManager.stop();
+        if(mBeaconDetectionManager != null)
+            mBeaconDetectionManager.stop();
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
-        mBeaconDetectionManager.destroy();
+        if(mBeaconDetectionManager != null)
+            mBeaconDetectionManager.destroy();
     }
 
 
@@ -92,31 +119,41 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
     }
 
     @Override
-    public void onBeaconFind(Region region, List<Beacon> beacons, Beacon closestBeacon) {
+    public void onBeaconFind(Region region, List<Beacon> beacons) {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
-        if(closestBeacon != null){
+        if(beacons.size() > 0){
             //good enough signal
             //go back to searching screen
-
             //TODO: Fix case when closest beacon changes
 
             InformationFragment infofrag = (InformationFragment) manager.findFragmentByTag("InformationFragment");
             StringBuffer beaconStatus = new StringBuffer();
-            for (Beacon b : beacons) {
-                beaconStatus.append("Beacon name: " + b.toString() + "\nBeacon signal strength: " + b.getRssi() + "\n\n");
-            }
-            if (!mShowBeaconInfo) {
-                if (infofrag == null) {
-                    infofrag = InformationFragment.newInstance(null, null);
+            //Collections.sort(beacons, new BeaconComparator()); //sort from strongest to weakest
+            Log.d("Beacons", "signal: " + beacons.get(0));
+
+            BeaconInfo selectedBeacon = null;
+
+            //find first beacon with data on the server
+            for(Beacon b : beacons){
+                if(mBeaconList.get(b.getMacAddress()) != null){
+                    //found
+                    selectedBeacon = mBeaconList.get(b.getMacAddress());
+                    break;
                 }
-                Toast.makeText(this, "Signal: " + closestBeacon.getRssi(), Toast.LENGTH_LONG).show();
+            }
+            if (selectedBeacon != null && !mShowBeaconInfo) {
+                if (infofrag == null) {
+                    infofrag = InformationFragment.newInstance(selectedBeacon.description, null);
+                }
+                //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
                 transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
                 transaction.commit();
+                infofrag.setText(selectedBeacon.description);
+                mShowBeaconInfo = true;
             }
-            infofrag.setText(beaconStatus.toString());
-            mShowBeaconInfo = true;
+
         }else{
             if(mShowBeaconInfo){
                 //go back to searching screen
@@ -132,9 +169,10 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
             }
         }
     }
-
-    @Override
-    public void onClosestBeaconFind(Beacon beacon) {
-
+    class BeaconComparator implements Comparator<Beacon> {
+        @Override
+        public int compare(Beacon a, Beacon b) {
+            return a.getRssi() < b.getRssi() ? 1 : a.getRssi() == b.getRssi() ? 0 : -1;
+        }
     }
 }
