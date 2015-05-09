@@ -5,6 +5,7 @@
 .DS_Store
 /build
 /captures
+.jar
 
 #built application files
 *.apk

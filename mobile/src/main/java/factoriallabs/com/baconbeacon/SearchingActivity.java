@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.Region;
+import com.parse.Parse;
 
 import java.util.List;
 
@@ -38,6 +39,12 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         if (savedInstanceState == null) {
 
         }
+
+        // Enable Local Datastore.
+        Parse.enableLocalDatastore(this);
+
+        Parse.initialize(this, "aMCN1DWIofhjx7Q2S4ezuOljE3A5FyJtRgAZm0sC", "7mAMLVFDkqHlkjmDM82M7bJFcg3l120eyQXLmYnp");
+
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
