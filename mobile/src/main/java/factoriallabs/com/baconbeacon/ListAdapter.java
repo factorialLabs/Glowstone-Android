@@ -13,7 +13,7 @@ import java.util.*;
 
 /**
  * Created by Steven on 2015-05-09.
- */
+
 public class ListAdapter extends ArrayAdapter<Beacon> {
 
     public ListAdapter(Context context, int textViewResourceId) {
@@ -59,3 +59,4 @@ public class ListAdapter extends ArrayAdapter<Beacon> {
     }
 
 }
+ */

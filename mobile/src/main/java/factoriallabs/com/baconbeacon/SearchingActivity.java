@@ -145,7 +145,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
             }
             if (selectedBeacon != null && !mShowBeaconInfo) {
                 if (infofrag == null) {
-                    infofrag = InformationFragment.newInstance(selectedBeacon.description, null);
+                    infofrag = InformationFragment.newInstance(selectedBeacon.description,selectedBeacon.name, selectedBeacon.imgUrl);
                 }
                 //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
                 transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.

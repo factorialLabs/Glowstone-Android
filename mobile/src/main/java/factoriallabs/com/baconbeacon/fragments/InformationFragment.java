@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.util.Locale;
 
@@ -32,31 +34,31 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
     private FadingActionBarHelper mFadingHelper;
     private Bundle mArguments;
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
     private TextToSpeech tts;
     private String mDescription;
     private TextView textView;
+    private String mName;
+    private String mURL;
+    private TextView titleView;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment InformationFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static InformationFragment newInstance(String description, String param2) {
+    public static InformationFragment newInstance(String description, String name, String url) {
         InformationFragment fragment = new InformationFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, description);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_PARAM2, name);
+        args.putString(ARG_PARAM3, url);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,7 +72,8 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mDescription = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mName = getArguments().getString(ARG_PARAM2);
+            mURL = getArguments().getString(ARG_PARAM3);
         }
         //mDescription = getActivity().getResources().getString(R.string.loren_ipsum);
         tts = new TextToSpeech(getActivity(), this);
@@ -90,11 +93,20 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         // Inflate the layout for this fragment
         View v = mFadingHelper.createView(inflater);
         ImageView img = (ImageView) v.findViewById(R.id.image_header);
-        img.setImageResource(R.drawable.mc);
 
         textView = (TextView) v.findViewById(R.id.description);
+        titleView = (TextView) v.findViewById(R.id.titleView);
         if(mDescription != null)
             textView.setText(mDescription);
+
+        if(mName != null)
+            titleView.setText(mName);
+
+        if(mURL != null){
+            ImageLoader.getInstance().displayImage(mURL, img);
+        }
+        else
+            img.setImageResource(R.drawable.mc);
 
         ImageButton btn = (ImageButton) v.findViewById(R.id.imageButton);
         btn.setOnClickListener(new View.OnClickListener() {
