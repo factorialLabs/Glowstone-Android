@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="factoriallabs.com.baconbeacon.tasks.MainActivity">
     <item android:id="@+id/action_list" android:title="@string/action_list"
-        android:orderInCategory="100" app:showAsAction="never" />
+        android:orderInCategory="100" android:visible="false" app:showAsAction="never" />
     <item android:id="@+id/action_speak" android:title="@string/action_speak"
         android:orderInCategory="100" app:showAsAction="always"
         android:icon="@drawable/ic_action_av_hearing"/>
