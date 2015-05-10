@@ -1,12 +1,15 @@
 package factoriallabs.com.baconbeacon.fragments;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.CycleInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.skyfishjy.library.RippleBackground;
 
 import factoriallabs.com.baconbeacon.R;
 
@@ -62,6 +65,13 @@ public class SearchingFragment extends Fragment {
                              Bundle savedInstanceState) {
         // -- inflate the layout for this fragment
 
-        return inflater.inflate(R.layout.fragment_searching, container, false);
+        View v = inflater.inflate(R.layout.fragment_searching, container, false);
+        //ImageView img = (ImageView) v.findViewById(R.id.imageView);
+        final RippleBackground rippleBackground=(RippleBackground)v.findViewById(R.id.content);
+        ImageView imageView=(ImageView)v.findViewById(R.id.centerImage);
+        rippleBackground.startRippleAnimation();
+
+        return v;
     }
+
 }

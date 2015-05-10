@@ -51,6 +51,9 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     private TextView titleView;
     private int mLastScrollY;
     private int mScrollThreshold = 4;
+    private ObservableScrollView scrollView;
+    private View v;
+    private Activity mActivity;
 
     /**
      * Use this factory method to create a new instance of
@@ -96,8 +99,20 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mArguments = getArguments();
+        int actionBarBg = R.color.primary;
+
+        mFadingHelper = new FadingActionBarHelper()
+                .actionBarBackground(actionBarBg)
+                .parallax(true)
+                .headerLayout(R.layout.header)
+                .contentLayout(R.layout.fragment_information)
+                .lightActionBar(true);
+        mFadingHelper.initActionBar(mActivity);
+
         // Inflate the layout for this fragment
-        View v = mFadingHelper.createView(inflater);
+        v = mFadingHelper.createView(inflater);
         ImageView img = (ImageView) v.findViewById(R.id.image_header);
 
         textView = (TextView) v.findViewById(R.id.description);
@@ -130,7 +145,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
                 }
             }
         });
-        ObservableScrollView scrollView = (ObservableScrollView) v.findViewById(R.id.fab__scroll_view);
+        scrollView = (ObservableScrollView) v.findViewById(R.id.fab__scroll_view);
         scrollView.setOnScrollChangedCallback(new OnScrollChangedCallback() {
             @Override
             public void onScroll(int i, int t) {
@@ -159,9 +174,20 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         }
     }
     @Override
-    public void onDetach() {
+         public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
     }
 
 
@@ -202,10 +228,12 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
+        /*
         mArguments = getArguments();
         int actionBarBg = R.color.primary;
 
@@ -216,5 +244,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
                 .contentLayout(R.layout.fragment_information)
                 .lightActionBar(true);
         mFadingHelper.initActionBar(activity);
+        */
+        mActivity = activity;
     }
 }
