@@ -372,17 +372,22 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         //  if (infofrag == null) {
-        InformationFragment infofrag = InformationFragment.newInstance(selectedBeacon.description, selectedBeacon.name, selectedBeacon.imgUrl);
-        //  }
-        //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
-        transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
-        transaction.setTransition(R.anim.abc_fade_in);
-        //transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
-        transaction.commit();
-        infofrag.setText(selectedBeacon.description);
-        mShowBeaconInfo = true;
-        mUserSelectedItem = true;
-        showNotif(selectedBeacon);
-        closePanel();
+        if (!selectedBeacon.extra.equals("Not in range")) {
+            InformationFragment infofrag = InformationFragment.newInstance(selectedBeacon.description, selectedBeacon.name, selectedBeacon.imgUrl);
+            //  }
+            //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
+            transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
+            transaction.setTransition(R.anim.abc_fade_in);
+            //transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
+            transaction.commit();
+            infofrag.setText(selectedBeacon.description);
+            mShowBeaconInfo = true;
+            mUserSelectedItem = true;
+            showNotif(selectedBeacon);
+            closePanel();
+        }
+        else{
+            Toast.makeText(this, "Beacon is too far!", Toast.LENGTH_LONG).show();
+        }
     }
 }
