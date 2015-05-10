@@ -121,7 +121,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         if (id == R.id.action_list) {
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            transaction.setCustomAnimations(R.anim.abc_fade_in,R.anim.abc_fade_out);
+            transaction.setTransition(R.anim.abc_fade_in);
 
             if (listfrag == null) {
                 listfrag = BeaconListFragment.newInstance(null, null);
@@ -172,13 +172,14 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
                     break;
                 }
             }
-            if (selectedBeacon != null) {
-                if (infofrag == null) {
+            if (selectedBeacon != null && !mShowBeaconInfo) {
+              //  if (infofrag == null) {
                     infofrag = InformationFragment.newInstance(selectedBeacon.description,selectedBeacon.name, selectedBeacon.imgUrl);
-                }
+              //  }
                 //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
                 transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
-                transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
+                transaction.setTransition(R.anim.abc_fade_in);
+                //transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
                 transaction.commit();
                 infofrag.setText(selectedBeacon.description);
                 mShowBeaconInfo = true;
