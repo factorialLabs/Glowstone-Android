@@ -8,7 +8,7 @@ public class BeaconInfo {
     public String description;
     public String name;
     public String imgUrl;
-    public String extra;
+    public String extra = "Not in range";
     public String Id;
 
     public BeaconInfo(String a, String b, String c, String d){

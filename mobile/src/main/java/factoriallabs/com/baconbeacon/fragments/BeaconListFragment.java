@@ -21,6 +21,7 @@ import com.google.android.gms.plus.model.people.Person;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import factoriallabs.com.baconbeacon.R;
@@ -91,7 +92,9 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
 
         // TODO: Change Adapter to display your content
         mAdapter = new BeaconAdapter(getActivity(), mList);
-        //mList.add(new BeaconInfo("lol","lol","lol","lol"));
+        BeaconInfo err = new BeaconInfo("Please try again later","No beacon found","lol","lol");
+        err.extra = "Please try again later";
+        mList.add(err);
         //mList.add(new BeaconInfo("lol","lol","lol","lol"));
         //mList.add(new BeaconInfo("lol","lol","lol","lol"));
     }
@@ -229,5 +232,10 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
+    class BeaconComparator implements Comparator<Beacon> {
+        @Override
+        public int compare(Beacon a, Beacon b) {
+            return a.getRssi() < b.getRssi() ? 1 : a.getRssi() == b.getRssi() ? 0 : -1;
+        }
+    }
 }

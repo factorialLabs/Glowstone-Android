@@ -230,6 +230,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
                 SearchingFragment searchFrag = (SearchingFragment) manager.findFragmentByTag("searchFrag");
                 //final InformationFragment finalInfofrag = infofrag;
                 final BeaconInfo finalSelectedBeacon = selectedBeacon;
+                if(searchFrag != null)
                 searchFrag.foundDevice(new Animator.AnimatorListener(){
 
                     @Override
@@ -252,7 +253,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
                                 finalInfofrag.setText(finalSelectedBeacon.description);
                                 mShowBeaconInfo = true;
                             }
-                        }, 1500);
+                        }, 1000);
                     }
 
                     @Override
@@ -364,7 +365,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         //  if (infofrag == null) {
-        InformationFragment infofrag = InformationFragment.newInstance(selectedBeacon.description,selectedBeacon.name, selectedBeacon.imgUrl);
+        InformationFragment infofrag = InformationFragment.newInstance(selectedBeacon.description, selectedBeacon.name, selectedBeacon.imgUrl);
         //  }
         //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
         transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
@@ -376,12 +377,5 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         mUserSelectedItem = true;
         showNotif(selectedBeacon);
         closePanel();
-    }
-
-    class BeaconComparator implements Comparator<Beacon> {
-        @Override
-        public int compare(Beacon a, Beacon b) {
-            return a.getRssi() < b.getRssi() ? 1 : a.getRssi() == b.getRssi() ? 0 : -1;
-        }
     }
 }
