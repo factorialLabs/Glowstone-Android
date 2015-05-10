@@ -25,11 +25,13 @@
             android:layout_marginEnd="22dp" />
 
         <TextView android:id="@+id/panel_headline" android:layout_width="wrap_content" android:layout_weight="1"
-            android:layout_height="match_parent" android:gravity="center"
+            android:layout_height="match_parent"
             android:text="View other beacons" android:textSize="20sp"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:layout_toStartOf="@+id/imageView" />
+            android:layout_toStartOf="@+id/imageView"
+            android:gravity="center_vertical|left"
+            android:paddingLeft="20dp" />
         </RelativeLayout>
     <ListView android:id="@android:id/list" android:layout_width="match_parent"
         android:layout_height="match_parent" />
