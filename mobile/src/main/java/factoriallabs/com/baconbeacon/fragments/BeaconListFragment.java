@@ -1,20 +1,32 @@
 package factoriallabs.com.baconbeacon.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.TwoLineListItem;
+
+import com.estimote.sdk.Beacon;
+import com.google.android.gms.plus.model.people.Person;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import factoriallabs.com.baconbeacon.R;
 
 import factoriallabs.com.baconbeacon.fragments.dummy.DummyContent;
+import factoriallabs.com.baconbeacon.tasks.BeaconInfo;
 
 /**
  * A fragment representing a list of Items.
@@ -47,7 +59,8 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private BeaconAdapter mAdapter;
+    private ArrayList<BeaconInfo> mList = new ArrayList<>();
 
     // TODO: Rename and change types of parameters
     public static BeaconListFragment newInstance(String param1, String param2) {
@@ -76,8 +89,10 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
         }
 
         // TODO: Change Adapter to display your content
-        mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+        mAdapter = new BeaconAdapter(getActivity(), mList);
+        //mList.add(new BeaconInfo("lol","lol","lol","lol"));
+        //mList.add(new BeaconInfo("lol","lol","lol","lol"));
+        //mList.add(new BeaconInfo("lol","lol","lol","lol"));
     }
 
     @Override
@@ -87,7 +102,7 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
@@ -95,16 +110,6 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
         return view;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
 
     @Override
     public void onDetach() {
@@ -149,4 +154,64 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
         public void onFragmentInteraction(String id);
     }
 
+    public void onBeaconDetect(Collection<BeaconInfo> list, String region){
+        mList.clear();
+        mList.addAll(list);
+        //mList = new ArrayList<>(list);
+        mAdapter.notifyDataSetChanged();
+        mListView.invalidateViews();
+    }
+
+    class BeaconAdapter extends BaseAdapter {
+
+        private Context context;
+        private ArrayList<BeaconInfo> items;
+
+        public BeaconAdapter(Context context, ArrayList<BeaconInfo> items) {
+            this.context = context;
+            this.items = items;
+        }
+
+        public void setList(ArrayList<BeaconInfo> l) {
+            items = l;
+            this.notifyDataSetChanged();
+        }
+        @Override
+        public int getCount() {
+            return items.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return items.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            TwoLineListItem twoLineListItem;
+
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                twoLineListItem = (TwoLineListItem) inflater.inflate(
+                        android.R.layout.simple_list_item_2, null);
+            } else {
+                twoLineListItem = (TwoLineListItem) convertView;
+            }
+
+            TextView text1 = twoLineListItem.getText1();
+            TextView text2 = twoLineListItem.getText2();
+
+            text1.setText(items.get(position).name);
+            text2.setText(items.get(position).extra);
+
+            return twoLineListItem;
+        }
+    }
 }

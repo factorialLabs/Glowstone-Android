@@ -10,10 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
+import com.manuelpeinado.fadingactionbar.view.ObservableScrollView;
+import com.manuelpeinado.fadingactionbar.view.OnScrollChangedCallback;
+import com.melnykov.fab.FloatingActionButton;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
@@ -45,6 +49,8 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
     private String mName;
     private String mURL;
     private TextView titleView;
+    private int mLastScrollY;
+    private int mScrollThreshold = 4;
 
     /**
      * Use this factory method to create a new instance of
@@ -108,7 +114,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         else
             img.setImageResource(R.drawable.mc);
 
-        ImageButton btn = (ImageButton) v.findViewById(R.id.imageButton);
+        final FloatingActionButton btn = (FloatingActionButton) v.findViewById(R.id.imageButton);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,6 +130,25 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
                 }
             }
         });
+        ObservableScrollView scrollView = (ObservableScrollView) v.findViewById(R.id.fab__scroll_view);
+        scrollView.setOnScrollChangedCallback(new OnScrollChangedCallback() {
+            @Override
+            public void onScroll(int i, int t) {
+                boolean isSignificantDelta = Math.abs(t - mLastScrollY) > mScrollThreshold;
+                if (isSignificantDelta) {
+                    if (t > mLastScrollY) {
+                        btn.show(true);
+                    } else {
+                        btn.hide(true);
+                    }
+                }
+                mLastScrollY = t;
+            }
+        });
+        //ListView listView = (ListView) v.findViewById(android.R.id.list);
+
+        //btn.attachToScrollView(scrollView);
+
         return v;
     }
 
@@ -186,6 +211,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
 
         mFadingHelper = new FadingActionBarHelper()
                 .actionBarBackground(actionBarBg)
+                .parallax(true)
                 .headerLayout(R.layout.header)
                 .contentLayout(R.layout.fragment_information)
                 .lightActionBar(true);

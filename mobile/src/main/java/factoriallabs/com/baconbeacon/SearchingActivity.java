@@ -1,10 +1,16 @@
 package factoriallabs.com.baconbeacon;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -24,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import factoriallabs.com.baconbeacon.estimote.BeaconDetectionManager;
+import factoriallabs.com.baconbeacon.fragments.BeaconListFragment;
 import factoriallabs.com.baconbeacon.fragments.InformationFragment;
 import factoriallabs.com.baconbeacon.fragments.SearchingFragment;
 import factoriallabs.com.baconbeacon.tasks.BeaconInfo;
@@ -37,10 +44,10 @@ import org.json.JSONObject;
 
 public class SearchingActivity extends AppCompatActivity implements BeaconDetectionManager.OnBeaconDetectListener{
 
-    private BeaconDetectionManager mBeaconDetectionManager;
-
     boolean mShowBeaconInfo = false;
+    private BeaconDetectionManager mBeaconDetectionManager;
     private HashMap<String, BeaconInfo> mBeaconList;
+    private BeaconListFragment listfrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +118,17 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_list) {
+            FragmentManager manager = getSupportFragmentManager();
+            FragmentTransaction transaction = manager.beginTransaction();
+            if (listfrag == null) {
+                listfrag = BeaconListFragment.newInstance(null, null);
+            }
+            //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
+            transaction.replace(R.id.container, listfrag, "beaconlistfragment"); // newInstance() is a static factory method.
+            transaction.addToBackStack("list");
+            transaction.commit();
+            mShowBeaconInfo = true;
             return true;
         }
 
@@ -136,6 +153,16 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
             BeaconInfo selectedBeacon = null;
 
             //find first beacon with data on the server
+            for(Beacon b : beacons) {
+                if (mBeaconList.get(b.getMacAddress()) != null) {
+                    mBeaconList.get(b.getMacAddress()).extra = "Signal: " + b.getRssi();
+                }
+            }
+
+            if(listfrag != null)
+                listfrag.onBeaconDetect(mBeaconList.values(), null);
+
+            //find first beacon with data on the server
             for(Beacon b : beacons){
                 if(mBeaconList.get(b.getMacAddress()) != null){
                     //found
@@ -152,6 +179,27 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
                 transaction.commit();
                 infofrag.setText(selectedBeacon.description);
                 mShowBeaconInfo = true;
+
+                //show notificaiton
+                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("Glowstone: " + selectedBeacon.name)
+                        .setContentText(selectedBeacon.description);
+                // Creates an explicit intent for an Activity in your app
+                Intent resultIntent = new Intent(this, SearchingActivity.class);
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                stackBuilder.addParentStack(SearchingActivity.class);
+                stackBuilder.addNextIntent(resultIntent);
+                PendingIntent resultPendingIntent =
+                        stackBuilder.getPendingIntent(
+                                0,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+                mBuilder.setContentIntent(resultPendingIntent);
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+// mId allows you to update the notification later on.
+                mNotificationManager.notify(1, mBuilder.build());
             }
 
         }else{
