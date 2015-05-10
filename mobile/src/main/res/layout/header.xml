@@ -24,6 +24,9 @@
         android:id="@+id/titleView"
         android:layout_alignBottom="@+id/image_header"
         android:layout_centerHorizontal="true"
-        android:paddingBottom="40dp"/>
+        android:paddingBottom="40dp"
+        android:padding="20dp"
+        android:background="@color/primary_dark"
+        android:alpha="0.90" />
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package factoriallabs.com.baconbeacon;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -7,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -18,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -46,13 +49,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class SearchingActivity extends AppCompatActivity implements BeaconDetectionManager.OnBeaconDetectListener{
+public class SearchingActivity extends AppCompatActivity implements BeaconListFragment.OnFragmentInteractionListener,BeaconDetectionManager.OnBeaconDetectListener, SlidingUpPanelLayout.PanelSlideListener {
 
     boolean mShowBeaconInfo = false;
     private BeaconDetectionManager mBeaconDetectionManager;
     private HashMap<String, BeaconInfo> mBeaconList;
     private BeaconListFragment listfrag;
     private SlidingUpPanelLayout mFrame;
+    private boolean mUserSelectedItem = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,23 +64,25 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
 
         setContentView(R.layout.activity_main);
         mFrame = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
+        mFrame.setPanelSlideListener(this);
         if (savedInstanceState == null) {
 
         }
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-
-        transaction.replace(R.id.container, SearchingFragment.newInstance(null, null), "searchfragment"); // newInstance() is a static factory method.
+        final SearchingFragment searchFrag = SearchingFragment.newInstance(null, null);
+        transaction.replace(R.id.container, searchFrag, "searchFrag"); // newInstance() is a static factory method.
         transaction.commit();
 
         mBeaconList = new HashMap<>();
-
+        searchFrag.setConnectedNetwork(false);
         new Task("Beacon", new Task.OnResultListener(){
 
             @Override
             public void onDone(List<ParseObject> object) {
+                if(object.size()>0)
+                    searchFrag.setConnectedNetwork(true);
                 for(ParseObject obj : object){
                     JSONObject jobj = obj.getJSONObject("beacon");
                     try {
@@ -109,7 +115,17 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         if(mFrame.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED){
             closePanel();
         }else{
-            super.onBackPressed();
+            if(mUserSelectedItem){
+                mUserSelectedItem = false;
+                mShowBeaconInfo = false;
+                FragmentManager manager = getSupportFragmentManager();
+                FragmentTransaction transaction = manager.beginTransaction();
+                final SearchingFragment searchFrag = SearchingFragment.newInstance(null, null);
+                transaction.replace(R.id.container, searchFrag, "searchFrag"); // newInstance() is a static factory method.
+                transaction.commit();
+            }else {
+                super.onBackPressed();
+            }
         }
 
 
@@ -159,27 +175,43 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         return super.onOptionsItemSelected(item);
     }
 
+    public String signalFormatter(int signalLvl){
+        if(signalLvl > -50){
+            return "Very Close";
+        }
+        if(signalLvl > -70){
+            return "Close";
+        }
+        if(signalLvl > -100){
+            return "Fair distance";
+        }
+        if(signalLvl > -200){
+            return "Far away";
+        }
+        return "Not in range";
+    }
+
     @Override
     public void onBeaconFind(Region region, List<Beacon> beacons) {
         FragmentManager manager = getSupportFragmentManager();
-        FragmentTransaction transaction = manager.beginTransaction();
+        final FragmentTransaction transaction = manager.beginTransaction();
 
         if(beacons.size() > 0){
             //good enough signal
             //go back to searching screen
             //TODO: Fix case when closest beacon changes
 
-            InformationFragment infofrag = (InformationFragment) manager.findFragmentByTag("InformationFragment");
-            StringBuffer beaconStatus = new StringBuffer();
+            //InformationFragment infofrag = (InformationFragment) manager.findFragmentByTag("InformationFragment");
+            //StringBuffer beaconStatus = new StringBuffer();
             //Collections.sort(beacons, new BeaconComparator()); //sort from strongest to weakest
-            Log.d("Beacons", "signal: " + beacons.get(0));
+            //Log.d("Beacons", "signal: " + beacons.get(0));
 
             BeaconInfo selectedBeacon = null;
 
             //find first beacon with data on the server
             for(Beacon b : beacons) {
                 if (mBeaconList.get(b.getMacAddress()) != null) {
-                    mBeaconList.get(b.getMacAddress()).extra = "Signal: " + b.getRssi();
+                    mBeaconList.get(b.getMacAddress()).extra = signalFormatter(b.getRssi());
                 }
             }
 
@@ -195,16 +227,44 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
                 }
             }
             if (selectedBeacon != null && !mShowBeaconInfo) {
-              //  if (infofrag == null) {
-                    infofrag = InformationFragment.newInstance(selectedBeacon.description,selectedBeacon.name, selectedBeacon.imgUrl);
-              //  }
-                //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
-                transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
-                transaction.setTransition(R.anim.abc_fade_in);
-                //transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
-                transaction.commit();
-                infofrag.setText(selectedBeacon.description);
-                mShowBeaconInfo = true;
+                SearchingFragment searchFrag = (SearchingFragment) manager.findFragmentByTag("searchFrag");
+                //final InformationFragment finalInfofrag = infofrag;
+                final BeaconInfo finalSelectedBeacon = selectedBeacon;
+                searchFrag.foundDevice(new Animator.AnimatorListener(){
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                InformationFragment finalInfofrag = InformationFragment.newInstance(finalSelectedBeacon.description,finalSelectedBeacon.name, finalSelectedBeacon.imgUrl);
+                                //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
+                                transaction.replace(R.id.container, finalInfofrag, "InformationFragment"); // newInstance() is a static factory method.
+                                transaction.setTransition(R.anim.abc_fade_in);
+                                //transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
+                                transaction.commit();
+                                finalInfofrag.setText(finalSelectedBeacon.description);
+                                mShowBeaconInfo = true;
+                            }
+                        }, 1500);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {
+
+                    }
+                });
 
                 showNotif(selectedBeacon);
             }
@@ -212,10 +272,12 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
         }else{
             if(mShowBeaconInfo){
                 //go back to searching screen
-                Fragment frag = manager.findFragmentByTag("searchfragment");
+                SearchingFragment frag = (SearchingFragment) manager.findFragmentByTag("searchfragment");
                 if(frag == null){
                     frag = SearchingFragment.newInstance(null, null);
                 }
+
+                //frag.setConnectedNetwork(true);
 
                 transaction.replace(R.id.container, frag, "searchfragment"); // newInstance() is a static factory method.
                 //transaction.setCustomAnimations(R.anim.abc_fade_out, R.anim.abc_fade_in);
@@ -271,6 +333,51 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
 // Issue the notification with notification manager.
         notificationManager.notify(1, notificationBuilder.build());
     }
+
+    @Override
+    public void onPanelSlide(View view, float v) {
+
+    }
+
+    @Override
+    public void onPanelCollapsed(View view) {
+        getSupportActionBar().show();
+    }
+
+    @Override
+    public void onPanelExpanded(View view) {
+        getSupportActionBar().hide();
+    }
+
+    @Override
+    public void onPanelAnchored(View view) {
+
+    }
+
+    @Override
+    public void onPanelHidden(View view) {
+
+    }
+
+    @Override
+    public void onFragmentInteraction(BeaconInfo selectedBeacon) {
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        //  if (infofrag == null) {
+        InformationFragment infofrag = InformationFragment.newInstance(selectedBeacon.description,selectedBeacon.name, selectedBeacon.imgUrl);
+        //  }
+        //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
+        transaction.replace(R.id.container, infofrag, "InformationFragment"); // newInstance() is a static factory method.
+        transaction.setTransition(R.anim.abc_fade_in);
+        //transaction.setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out);
+        transaction.commit();
+        infofrag.setText(selectedBeacon.description);
+        mShowBeaconInfo = true;
+        mUserSelectedItem = true;
+        showNotif(selectedBeacon);
+        closePanel();
+    }
+
     class BeaconComparator implements Comparator<Beacon> {
         @Override
         public int compare(Beacon a, Beacon b) {

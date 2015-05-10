@@ -48,6 +48,7 @@ public class BeaconDetectionManager {
         beaconManager.setRangingListener(new BeaconManager.RangingListener() {
             @Override
             public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
+                //Log.i("Beacons", beacons.toString());
                 double min_rssi = -1000;
                 Beacon min = null;
                 List<Beacon> nearBeacons = new ArrayList<Beacon>();

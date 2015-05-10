@@ -28,6 +28,26 @@
             android:layout_centerInParent="true"
             android:id="@+id/centerImage"
             android:src="@drawable/ic_action_device_wifi_tethering"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/network_msg"
+            android:text="Awaiting network connection"
+            android:textSize="16sp"
+            android:gravity="center_horizontal"
+            android:padding="10dp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:id="@+id/foundDevice"
+            android:layout_above="@id/centerImage"
+            android:layout_marginBottom="32dp"
+            android:layout_toLeftOf="@id/centerImage"
+            android:layout_marginRight="6dp"
+            android:src="@drawable/beacon_purple"
+            android:visibility="invisible"/>
     </com.skyfishjy.library.RippleBackground>
 
 </LinearLayout>

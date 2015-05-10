@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="factoriallabs.com.baconbeacon.fragments.BeaconListFragment">
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="68dp"
         android:orientation="horizontal"
@@ -13,16 +13,22 @@
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:paddingLeft="15dp"
-            android:layout_margin="10dp"
 
-            android:src="@drawable/ic_action_navigation_menu"/>
+            android:src="@drawable/ic_action_navigation_menu"
+            android:id="@+id/imageView"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true" />
 
-        <TextView android:id="@+id/panel_headline" android:layout_width="0dp" android:layout_weight="1"
+        <TextView android:id="@+id/panel_headline" android:layout_width="wrap_content" android:layout_weight="1"
             android:layout_height="match_parent" android:gravity="center"
-            android:text="View other beacons"/>
-        </LinearLayout>
+            android:text="View other beacons" android:textSize="20sp"
+            android:layout_alignTop="@+id/imageView"
+            android:layout_centerHorizontal="true" />
+        </RelativeLayout>
     <ListView android:id="@android:id/list" android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

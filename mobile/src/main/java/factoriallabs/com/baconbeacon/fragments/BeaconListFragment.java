@@ -61,6 +61,7 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
      */
     private BeaconAdapter mAdapter;
     private ArrayList<BeaconInfo> mList = new ArrayList<>();
+    private TextView headline;
 
     // TODO: Rename and change types of parameters
     public static BeaconListFragment newInstance(String param1, String param2) {
@@ -107,6 +108,8 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
+        headline = (TextView) view.findViewById(R.id.panel_headline);
+
         return view;
     }
 
@@ -122,7 +125,7 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            mListener.onFragmentInteraction(mList.get(position));
         }
     }
 
@@ -151,7 +154,7 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(BeaconInfo id);
     }
 
     public void onBeaconDetect(Collection<BeaconInfo> list, String region){
@@ -160,6 +163,8 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
         //mList = new ArrayList<>(list);
         mAdapter.notifyDataSetChanged();
         mListView.invalidateViews();
+
+        headline.setText(String.format("View %d other beacons", list.size()));
     }
 
     class BeaconAdapter extends BaseAdapter {
@@ -214,4 +219,15 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
             return twoLineListItem;
         }
     }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
 }
