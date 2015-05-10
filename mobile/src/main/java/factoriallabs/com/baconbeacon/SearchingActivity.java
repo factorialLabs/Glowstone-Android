@@ -136,15 +136,15 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
     @Override
     public void onStop(){
         super.onStop();
-        if(mBeaconDetectionManager != null)
-            mBeaconDetectionManager.stop();
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
-        if(mBeaconDetectionManager != null)
+        if(mBeaconDetectionManager != null){
+            mBeaconDetectionManager.stop();
             mBeaconDetectionManager.destroy();
+        }
     }
 
 
@@ -213,7 +213,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
             //find first beacon with data on the server
             for(Beacon b : beacons) {
                 if (mBeaconList.get(b.getMacAddress()) != null) {
-                    mBeaconList.get(b.getMacAddress()).extra = signalFormatter(b.getRssi());
+                    mBeaconList.get(b.getMacAddress()).extra = signalFormatter(b.getRssi()) + " ("+b.getRssi()+ " " + b.getMacAddress()+")";
                 }
             }
 
