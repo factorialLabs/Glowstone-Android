@@ -3,6 +3,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:elevation="2dp"
     >
 
     <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,6 +12,7 @@
         android:layout_height="300dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
+        android:background="@color/primary"
         />
 
     <TextView
@@ -21,6 +23,7 @@
         android:text="Place"
         android:id="@+id/titleView"
         android:layout_alignBottom="@+id/image_header"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="40dp"/>
 
 </RelativeLayout>

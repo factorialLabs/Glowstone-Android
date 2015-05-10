@@ -128,7 +128,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         }
         else
             img.setImageResource(R.drawable.mc);
-
+/*
         final FloatingActionButton btn = (FloatingActionButton) v.findViewById(R.id.imageButton);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,7 +159,7 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
                 }
                 mLastScrollY = t;
             }
-        });
+        });*/
         //ListView listView = (ListView) v.findViewById(android.R.id.list);
 
         //btn.attachToScrollView(scrollView);
@@ -214,6 +214,19 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
         }
     }
 
+    public void speak() {
+        //read aloud
+        if (tts!=null) {
+            if (mDescription!=null) {
+                if (!tts.isSpeaking()) {
+                    tts.speak(mDescription, TextToSpeech.QUEUE_FLUSH, null);
+                }else{
+                    tts.stop();
+                }
+            }
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -243,8 +256,8 @@ public class InformationFragment extends Fragment implements TextToSpeech.OnInit
                 .headerLayout(R.layout.header)
                 .contentLayout(R.layout.fragment_information)
                 .lightActionBar(true);
-        mFadingHelper.initActionBar(activity);
-        */
+        mFadingHelper.initActionBar(activity);*/
+
         mActivity = activity;
     }
 }

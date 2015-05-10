@@ -1,15 +1,18 @@
 package factoriallabs.com.baconbeacon;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,6 +25,7 @@ import com.estimote.sdk.Beacon;
 import com.estimote.sdk.Region;
 import com.parse.Parse;
 import com.parse.ParseObject;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,13 +52,14 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
     private BeaconDetectionManager mBeaconDetectionManager;
     private HashMap<String, BeaconInfo> mBeaconList;
     private BeaconListFragment listfrag;
+    private SlidingUpPanelLayout mFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        //FrameLayout frame = (FrameLayout) findViewById(R.id.container);
+        mFrame = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         if (savedInstanceState == null) {
 
@@ -87,6 +92,28 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
 
             }
         }).run();
+        FragmentTransaction transaction2 = manager.beginTransaction();
+        transaction2.setTransition(R.anim.abc_fade_in);
+
+        if (listfrag == null) {
+            listfrag = BeaconListFragment.newInstance(null, null);
+        }
+        //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
+        transaction2.replace(R.id.panel_container, listfrag, "beaconlistfragment"); // newInstance() is a static factory method.
+        //transaction2.addToBackStack("list");
+        transaction2.commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mFrame.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED){
+            closePanel();
+        }else{
+            super.onBackPressed();
+        }
+
+
+        //moveTaskToBack(true);
     }
     @Override
     public void onStop(){
@@ -119,19 +146,14 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_list) {
-            FragmentManager manager = getSupportFragmentManager();
-            FragmentTransaction transaction = manager.beginTransaction();
-            transaction.setTransition(R.anim.abc_fade_in);
-
-            if (listfrag == null) {
-                listfrag = BeaconListFragment.newInstance(null, null);
-            }
-            //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
-            transaction.replace(R.id.container, listfrag, "beaconlistfragment"); // newInstance() is a static factory method.
-            transaction.addToBackStack("list");
-            transaction.commit();
-            mShowBeaconInfo = true;
+            openPanel();
             return true;
+        }
+        if(id == R.id.action_speak){
+            FragmentManager manager = getSupportFragmentManager();
+            InformationFragment infofrag = (InformationFragment) manager.findFragmentByTag("InformationFragment");
+            if(infofrag != null)
+                infofrag.speak();
         }
 
         return super.onOptionsItemSelected(item);
@@ -184,26 +206,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
                 infofrag.setText(selectedBeacon.description);
                 mShowBeaconInfo = true;
 
-                //show notificaiton
-                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("Glowstone: " + selectedBeacon.name)
-                        .setContentText(selectedBeacon.description);
-                // Creates an explicit intent for an Activity in your app
-                Intent resultIntent = new Intent(this, SearchingActivity.class);
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-                stackBuilder.addParentStack(SearchingActivity.class);
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                mBuilder.setContentIntent(resultPendingIntent);
-                NotificationManager mNotificationManager =
-                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-// mId allows you to update the notification later on.
-                mNotificationManager.notify(1, mBuilder.build());
+                showNotif(selectedBeacon);
             }
 
         }else{
@@ -215,12 +218,58 @@ public class SearchingActivity extends AppCompatActivity implements BeaconDetect
                 }
 
                 transaction.replace(R.id.container, frag, "searchfragment"); // newInstance() is a static factory method.
-                transaction.setCustomAnimations(R.anim.abc_fade_out, R.anim.abc_fade_in);
+                //transaction.setCustomAnimations(R.anim.abc_fade_out, R.anim.abc_fade_in);
+                transaction.setTransition(R.anim.abc_fade_out);
                 transaction.commit();
 
                 mShowBeaconInfo = false;
+
             }
         }
+    }
+
+    public void openPanel(){
+        mFrame.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+        getSupportActionBar().hide();
+    }
+
+    public void closePanel(){
+        mFrame.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        getSupportActionBar().show();
+    }
+
+    public void showNotif(BeaconInfo selectedBeacon){
+        //show notificaiton
+        // Create an intent for the reply action
+        Intent actionIntent = new Intent(this, SearchingActivity.class);
+        PendingIntent actionPendingIntent =
+                PendingIntent.getActivity(this, 0, actionIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+// Create the action
+        NotificationCompat.Action action =
+                new NotificationCompat.Action.Builder(R.drawable.ic_action_device_wifi_tethering,
+                        "Glowstone: " + selectedBeacon.name, actionPendingIntent)
+                        .build();
+        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+        bigStyle.bigText(selectedBeacon.description);
+
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_action_device_wifi_tethering)
+                        .setLargeIcon(BitmapFactory.decodeResource(
+                                getResources(), R.drawable.mc))
+                        .setContentTitle("Glowstone: " + selectedBeacon.name)
+                        .setContentText(selectedBeacon.description)
+                        .setContentIntent(actionPendingIntent)
+                        .setStyle(bigStyle);
+        notificationBuilder.setPriority(Notification.PRIORITY_HIGH);
+        // Get an instance of the NotificationManager service
+        NotificationManagerCompat notificationManager =
+                NotificationManagerCompat.from(this);
+
+// Issue the notification with notification manager.
+        notificationManager.notify(1, notificationBuilder.build());
     }
     class BeaconComparator implements Comparator<Beacon> {
         @Override

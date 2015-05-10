@@ -20,7 +20,7 @@ public class BaconApplication extends Application {
         Parse.initialize(this, "aMCN1DWIofhjx7Q2S4ezuOljE3A5FyJtRgAZm0sC", "7mAMLVFDkqHlkjmDM82M7bJFcg3l120eyQXLmYnp");
 
         // Create global configuration and initialize ImageLoader with this config
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).
         .build();
         ImageLoader.getInstance().init(config);
     }
