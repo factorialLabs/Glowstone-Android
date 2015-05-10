@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.CycleInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,11 +26,11 @@ import factoriallabs.com.baconbeacon.R;
 public class SearchingFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM1 = "network";
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private boolean mParam1;
     private String mParam2;
     private TextView networkText;
     private ImageView foundDevice;
@@ -46,10 +45,10 @@ public class SearchingFragment extends Fragment {
      * @return A new instance of fragment SearchingFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SearchingFragment newInstance(String param1, String param2) {
+    public static SearchingFragment newInstance(boolean param1, String param2) {
         SearchingFragment fragment = new SearchingFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putBoolean(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -63,7 +62,7 @@ public class SearchingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam1 = getArguments().getBoolean(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
@@ -91,12 +90,14 @@ public class SearchingFragment extends Fragment {
         foundDevice=(ImageView)v.findViewById(R.id.foundDevice);
         rippleBackground.startRippleAnimation();
 
+        setConnectedNetwork(mParam1);
+
         return v;
     }
     public void foundDevice(Animator.AnimatorListener l){
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.addListener(l);
-        animatorSet.setDuration(400);
+        animatorSet.setDuration(500);
         animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
         ArrayList<Animator> animatorList=new ArrayList<Animator>();
         ObjectAnimator scaleXAnimator = ObjectAnimator.ofFloat(foundDevice, "ScaleX", 0f, 1.2f, 1f);
@@ -104,7 +105,8 @@ public class SearchingFragment extends Fragment {
         ObjectAnimator scaleYAnimator = ObjectAnimator.ofFloat(foundDevice, "ScaleY", 0f, 1.2f, 1f);
         animatorList.add(scaleYAnimator);
         animatorSet.playTogether(animatorList);
-        foundDevice.setVisibility(View.VISIBLE);
+        if(foundDevice != null)
+            foundDevice.setVisibility(View.VISIBLE);
         animatorSet.start();
     }
 }

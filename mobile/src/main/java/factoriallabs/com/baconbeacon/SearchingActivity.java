@@ -71,12 +71,12 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        final SearchingFragment searchFrag = SearchingFragment.newInstance(null, null);
+        final SearchingFragment searchFrag = SearchingFragment.newInstance(false, null);
         transaction.replace(R.id.container, searchFrag, "searchFrag"); // newInstance() is a static factory method.
         transaction.commit();
 
         mBeaconList = new HashMap<>();
-        searchFrag.setConnectedNetwork(false);
+
         new Task("Beacon", new Task.OnResultListener(){
 
             @Override
@@ -108,6 +108,8 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         transaction2.replace(R.id.panel_container, listfrag, "beaconlistfragment"); // newInstance() is a static factory method.
         //transaction2.addToBackStack("list");
         transaction2.commit();
+
+        searchFrag.setConnectedNetwork(false);
     }
 
     @Override
@@ -120,7 +122,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
                 mShowBeaconInfo = false;
                 FragmentManager manager = getSupportFragmentManager();
                 FragmentTransaction transaction = manager.beginTransaction();
-                final SearchingFragment searchFrag = SearchingFragment.newInstance(null, null);
+                final SearchingFragment searchFrag = SearchingFragment.newInstance(true, null);
                 transaction.replace(R.id.container, searchFrag, "searchFrag"); // newInstance() is a static factory method.
                 transaction.commit();
             }else {
@@ -182,7 +184,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         if(signalLvl > -70){
             return "Close";
         }
-        if(signalLvl > -100){
+        if(signalLvl > -80){
             return "Fair distance";
         }
         if(signalLvl > -200){
@@ -230,12 +232,15 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
                 SearchingFragment searchFrag = (SearchingFragment) manager.findFragmentByTag("searchFrag");
                 //final InformationFragment finalInfofrag = infofrag;
                 final BeaconInfo finalSelectedBeacon = selectedBeacon;
+                if(searchFrag == null){
+                    searchFrag = SearchingFragment.newInstance(true, null);
+                }
                 if(searchFrag != null)
                 searchFrag.foundDevice(new Animator.AnimatorListener(){
 
                     @Override
                     public void onAnimationStart(Animator animation) {
-
+                        mShowBeaconInfo = true;
                     }
 
                     @Override
@@ -273,17 +278,19 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         }else{
             if(mShowBeaconInfo){
                 //go back to searching screen
-                SearchingFragment frag = (SearchingFragment) manager.findFragmentByTag("searchfragment");
+                SearchingFragment frag = (SearchingFragment) manager.findFragmentByTag("searchFrag");
                 if(frag == null){
-                    frag = SearchingFragment.newInstance(null, null);
+                    frag = SearchingFragment.newInstance(true, null);
                 }
 
-                //frag.setConnectedNetwork(true);
+
 
                 transaction.replace(R.id.container, frag, "searchfragment"); // newInstance() is a static factory method.
                 //transaction.setCustomAnimations(R.anim.abc_fade_out, R.anim.abc_fade_in);
                 transaction.setTransition(R.anim.abc_fade_out);
                 transaction.commit();
+
+                frag.setConnectedNetwork(true);
 
                 mShowBeaconInfo = false;
 
