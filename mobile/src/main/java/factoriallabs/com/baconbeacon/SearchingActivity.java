@@ -387,7 +387,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
             closePanel();
         }
         else{
-            Toast.makeText(this, "Beacon is too far!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Beacon is too far away!", Toast.LENGTH_LONG).show();
         }
     }
 }
