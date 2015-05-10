@@ -213,7 +213,11 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
             //find first beacon with data on the server
             for(Beacon b : beacons) {
                 if (mBeaconList.get(b.getMacAddress()) != null) {
-                    mBeaconList.get(b.getMacAddress()).extra = signalFormatter(b.getRssi()) + " ("+b.getRssi()+ " " + b.getMacAddress()+")";
+                    mBeaconList.get(b.getMacAddress()).extra = signalFormatter(b.getRssi()) + " ("+b.getRssi()+ ", " + b.getMacAddress()+")";
+                }else{
+                    BeaconInfo temp = new BeaconInfo("Unknown","Unknown Beacon","Not in Range","Not in Range");
+                    temp.extra = signalFormatter(b.getRssi()) + " ("+b.getRssi()+ ", " + b.getMacAddress()+")";
+                    mBeaconList.put(b.getMacAddress(), temp);
                 }
             }
 
@@ -372,7 +376,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         //  if (infofrag == null) {
-        if (!selectedBeacon.extra.equals("Not in range")) {
+        if (!selectedBeacon.extra.equals("Not in range") && !selectedBeacon.name.equals("Unknown Beacon")) {
             InformationFragment infofrag = InformationFragment.newInstance(selectedBeacon.description, selectedBeacon.name, selectedBeacon.imgUrl);
             //  }
             //Toast.makeText(this, "Signal: " + selectedBeacon.getRssi(), Toast.LENGTH_LONG).show();
@@ -387,7 +391,10 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
             closePanel();
         }
         else{
-            Toast.makeText(this, "Beacon is too far away!", Toast.LENGTH_LONG).show();
+            if(selectedBeacon.name.equals("Unknown Beacon"))
+                Toast.makeText(this, "Beacon unrecognized!", Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(this, "Beacon is too far away!", Toast.LENGTH_LONG).show();
         }
     }
 }

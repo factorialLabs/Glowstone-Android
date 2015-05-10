@@ -21,6 +21,7 @@ import com.google.android.gms.plus.model.people.Person;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -163,6 +164,7 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
     public void onBeaconDetect(Collection<BeaconInfo> list, String region){
         mList.clear();
         mList.addAll(list);
+        Collections.sort(mList, new BeaconComparator());
         //mList = new ArrayList<>(list);
         mAdapter.notifyDataSetChanged();
         mListView.invalidateViews();
@@ -232,10 +234,13 @@ public class BeaconListFragment extends Fragment implements AbsListView.OnItemCl
                     + " must implement OnFragmentInteractionListener");
         }
     }
-    class BeaconComparator implements Comparator<Beacon> {
+    class BeaconComparator implements Comparator<BeaconInfo> {
         @Override
-        public int compare(Beacon a, Beacon b) {
-            return a.getRssi() < b.getRssi() ? 1 : a.getRssi() == b.getRssi() ? 0 : -1;
+        public int compare(BeaconInfo a, BeaconInfo b) {
+            if(!a.extra.equals("Not in range")){
+                return -1;
+            }
+            return 1;
         }
     }
 }
