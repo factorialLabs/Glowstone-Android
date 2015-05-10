@@ -328,7 +328,7 @@ public class SearchingActivity extends AppCompatActivity implements BeaconListFr
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_action_device_wifi_tethering)
                         .setLargeIcon(BitmapFactory.decodeResource(
-                                getResources(), R.drawable.mc))
+                                getResources(), R.mipmap.ic_launcher))
                         .setContentTitle("Glowstone: " + selectedBeacon.name)
                         .setContentText(selectedBeacon.description)
                         .setContentIntent(actionPendingIntent)
